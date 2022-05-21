@@ -1,0 +1,116 @@
+d0p1b@anvil:code$ ./sRead 10
+207
+d0p1b@anvil:code$ ./aRead 10
+207
+d0p1b@anvil:code$ ./sRead 100
+1644
+d0p1b@anvil:code$ ./aRead 100
+1644
+
+(gdb) b 15
+Breakpoint 1 at 0x400a8f: file aRead.c, line 17.
+(gdb) run 3
+Starting program: /home/d/d0p1b/cs213/code/aRead 3
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib64/libthread_db.so.1".
+
+Breakpoint 1, interrupt_service_routine () at aRead.c:17
+17	  queue_dequeue (pending_read_queue, &val, NULL, &callback);
+(gdb) bt
+#0  interrupt_service_routine () at aRead.c:17
+#1  0x0000000000400f42 in deliverInterrupt () at disk.c:105
+#2  0x0000000000400fbb in handleTimerInterrupt (signo=14, info=0x7fffffffda30, uap=0x7fffffffd900) at disk.c:118
+#3  <signal handler called>
+#4  main (argc=2, argv=0x7fffffffde58) at aRead.c:61
+(gdb) c
+Continuing.
+
+Breakpoint 1, interrupt_service_routine () at aRead.c:17
+17	  queue_dequeue (pending_read_queue, &val, NULL, &callback);
+(gdb) bt
+#0  interrupt_service_routine () at aRead.c:17
+#1  0x0000000000400f42 in deliverInterrupt () at disk.c:105
+#2  0x0000000000400fbb in handleTimerInterrupt (signo=14, info=0x7fffffffd570, uap=0x7fffffffd440) at disk.c:118
+#3  <signal handler called>
+#4  interrupt_service_routine () at aRead.c:17
+#5  0x0000000000400f42 in deliverInterrupt () at disk.c:105
+#6  0x0000000000400fbb in handleTimerInterrupt (signo=14, info=0x7fffffffda30, uap=0x7fffffffd900) at disk.c:118
+#7  <signal handler called>
+#8  main (argc=2, argv=0x7fffffffde58) at aRead.c:61
+(gdb) c
+Continuing.
+
+Breakpoint 1, interrupt_service_routine () at aRead.c:17
+17	  queue_dequeue (pending_read_queue, &val, NULL, &callback);
+(gdb) bt
+#0  interrupt_service_routine () at aRead.c:17
+#1  0x0000000000400f42 in deliverInterrupt () at disk.c:105
+#2  0x0000000000400fbb in handleTimerInterrupt (signo=14, info=0x7fffffffd570, uap=0x7fffffffd440) at disk.c:118
+#3  <signal handler called>
+#4  interrupt_service_routine () at aRead.c:17
+#5  0x0000000000400f42 in deliverInterrupt () at disk.c:105
+#6  0x0000000000400fbb in handleTimerInterrupt (signo=14, info=0x7fffffffda30, uap=0x7fffffffd900) at disk.c:118
+#7  <signal handler called>
+#8  main (argc=2, argv=0x7fffffffde58) at aRead.c:61
+(gdb) c
+Continuing.
+
+Breakpoint 1, interrupt_service_routine () at aRead.c:17
+17	  queue_dequeue (pending_read_queue, &val, NULL, &callback);
+(gdb) bt
+#0  interrupt_service_routine () at aRead.c:17
+#1  0x0000000000400f42 in deliverInterrupt () at disk.c:105
+#2  0x0000000000400fbb in handleTimerInterrupt (signo=14, info=0x7fffffffda30, uap=0x7fffffffd900) at disk.c:118
+#3  <signal handler called>
+#4  main (argc=2, argv=0x7fffffffde58) at aRead.c:61
+(gdb) c
+Continuing.
+84
+[Inferior 1 (process 17845) exited normally]
+
+It is clear that at each call to the interrupt, a new set of frames is added to the stack. Then after the input 
+number of read requests is registered, each call to the interrupt then removes a set of frames.
+
+d0p1b@anvil:code$ time ./aRead 10
+207
+
+real	0m0.015s
+user	0m0.010s
+sys	0m0.004s
+d0p1b@anvil:code$ time ./aRead 100
+1644
+
+real	0m0.015s
+user	0m0.014s
+sys	0m0.000s
+d0p1b@anvil:code$ time ./aRead 1000
+16193
+
+real	0m0.018s
+user	0m0.013s
+sys	0m0.004s
+
+d0p1b@anvil:code$ time ./sRead 10
+207
+
+real	0m0.114s
+user	0m0.109s
+sys	0m0.004s
+d0p1b@anvil:code$ time ./sRead 100
+
+real	0m1.103s
+user	0m1.102s
+sys	0m0.000s
+d0p1b@anvil:code$ time ./sRead 1000
+16193
+
+real	0m10.996s
+user	0m10.991s
+sys	0m0.004s
+
+Clearly, aRead is a lot faster than sRead. This is likely because sRead uses the while loop within the 
+for loop to iterate until there are no more reads pending and thus must take additional run time. The 
+reads are requested but not returned immediately, and thus must hold onto the data. This means that when 
+completion routine runs at the end, the iterator must iterate all the way though the set of data again. 
+In aRead, each read request registers a completion routine and returns immediately, eliminating the need 
+for another iteration.

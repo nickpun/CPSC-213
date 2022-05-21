@@ -1,0 +1,54 @@
+d0p1b@anvil:code$ ./sRead 10
+set num_blocks to strtol(argv [1], &endptr, 10)
+start for loop
+set is_read_pending to 1
+set is_read_pending to 0
+set is_read_pending to 1
+set is_read_pending to 0
+set is_read_pending to 1
+set is_read_pending to 0
+set is_read_pending to 1
+set is_read_pending to 0
+set is_read_pending to 1
+set is_read_pending to 0
+set is_read_pending to 1
+set is_read_pending to 0
+set is_read_pending to 1
+set is_read_pending to 0
+set is_read_pending to 1
+set is_read_pending to 0
+set is_read_pending to 1
+set is_read_pending to 0
+set is_read_pending to 1
+set is_read_pending to 0
+207
+
+The program uses a loop to read. At each loop iteration, the program sets the flag is_read_pending to 1 (true), 
+then requests disk_schedule_read, then throws the program into a while loop. This while loop acummulates the read 
+numbers by iterating over each and adding them into the field "sum" until the interrupt service routine sets the 
+is_read_pending flad to 0 (false). This happens for the amount of times that the user inputs. In mine I input 10 
+and so the for loop runs 10 times. At the end the sum is printed out.
+
+d0p1b@anvil:code$ time ./sRead 10
+207
+
+real	0m0.113s
+user	0m0.112s
+sys	0m0.000s
+d0p1b@anvil:code$ time ./sRead 100
+1644
+
+real	0m1.102s
+user	0m1.101s
+sys	0m0.000s
+d0p1b@anvil:code$ time ./sRead 1000
+16193
+
+real	0m11.000s
+user	0m10.999s
+sys	0m0.000s
+
+From these tests, it is clear that the input of the program call has a linear relationship with the run time of the 
+program. An input of ten times more results in a run time of ten times longer. This is because the program must 
+iterate through its for loop the number of times the user inputs. Each iteration runs in constant time (O(1)) as 
+the while loop within the for loop runs in constant time. Therefore, the program's running time is O(n).

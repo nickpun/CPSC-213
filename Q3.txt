@@ -1,0 +1,29 @@
+d0p1b@anvil:code$ ./tRead 10
+207
+d0p1b@anvil:code$ ./tRead 100
+1644
+d0p1b@anvil:code$ ./tRead 1000
+16193
+
+d0p1b@anvil:code$ time ./tRead 10
+207
+
+real	0m0.029s
+user	0m0.006s
+sys	0m0.020s
+d0p1b@anvil:code$ time ./tRead 100
+1644
+
+real	0m0.085s
+user	0m0.000s
+sys	0m0.083s
+d0p1b@anvil:code$ time ./tRead 1000
+16193
+
+real	0m0.108s
+user	0m0.006s
+sys	0m0.098s
+
+In this method of reading, the real time is slower than aRead but still faster than sRead. Furthermore, 
+in aRead the program spends the majority of the runtime was spent in user, whereas in tRead the majority 
+is spent in the operating system. This is what I believe is the result of hiding the asychrony with threads.
